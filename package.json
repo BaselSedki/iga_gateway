@@ -4,13 +4,18 @@
   "description": "Integration Gateway for managing data flow and SMS notifications",
   "main": "src/app.js",
   "scripts": {
-    "start": "node src/app.js", 
+    "start": "node src/app.js",
     "dev": "nodemon src/app.js"
   },
-  "keywords": ["Integration Gateway", "Node.js", "API"],
+  "keywords": [
+    "Integration Gateway",
+    "Node.js",
+    "API"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.7",
     "body-parser": "^1.20.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
