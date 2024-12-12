@@ -1,52 +1,139 @@
+const axios = require('axios');
 const logger = require('../utils/logger');
+const LogRecord = require('../Model/LogRecord'); // Import the MongoDB model
+require('dotenv').config(); // Load environment variables
 
-const processData = (req, res) => {
-  const { data } = req.body;
-  logger.info('Received data:', { data });
-  res.status(200).json({ message: 'Data processed successfully', data });
+// Handle data processing and log to MongoDB
+const processData = async (req, res) => {
+  try {
+    const { data } = req.body;
+
+    if (!data) {
+      return res.status(400).json({ message: 'No data provided' });
+    }
+
+    logger.info('Received data:', { data });
+
+    // Save log entry to MongoDB
+    const logData = {
+      level: 'info',
+      message: 'Data processed successfully',
+      timestamp: new Date(),
+      additionalData: { data },
+    };
+
+    const newLog = new LogRecord(logData);
+    await newLog.save();
+
+    res.status(200).json({ message: 'Data processed and logged successfully', data });
+  } catch (error) {
+    logger.error('Error processing data:', { error: error.message });
+
+    // Save error log entry to MongoDB
+    const errorLog = new LogRecord({
+      level: 'error',
+      message: 'Error processing data',
+      timestamp: new Date(),
+      additionalData: { error: error.message },
+    });
+    await errorLog.save();
+
+    res.status(500).json({ message: 'Error processing data', error: error.message });
+  }
 };
 
-  
-  const sendSMS = (req, res) => {
-    const { phone, message } = req.body;
-    // Mock sending SMS
-    console.log(`Sending SMS to ${phone}: ${message}`);
-    res.status(200).json({ message: 'SMS sent successfully' });
-  };
-  
-  module.exports = { processData, sendSMS };
-  
+// Handle SMS sending and log to MongoDB
+const sendSMS = async (req, res) => {
+  try {
+    const { incdientid, summarydetails } = req.body;
 
-  const axios = require('axios');
-require('dotenv').config(); // To load Jira credentials securely from `.env`
+    if (!incdientid || !summarydetails) {
+      return res.status(400).json({ message: 'incdientid and summarydetails are required' });
+    }
 
+    // Simulate SMS sending (replace with actual SMS service)
+    console.log(`Sending SMS to ${incdientid}: ${summarydetails}`);
+    logger.info(`SMS sent to ${incdientid}: ${summarydetails}`);
+
+    // Save SMS log entry to MongoDB
+    const logData = {
+      level: 'info',
+      message: `SMS sent to ${incdientid}: ${summarydetails}`,
+      timestamp: new Date(),
+    };
+
+    const newLog = new LogRecord(logData);
+    await newLog.save();
+
+    res.status(200).json({ message: 'SMS sent and logged successfully' });
+  } catch (error) {
+    logger.error('Error sending SMS:', { error: error.message });
+
+    // Save error log entry to MongoDB
+    const errorLog = new LogRecord({
+      level: 'error',
+      message: 'Error sending SMS',
+      timestamp: new Date(),
+      additionalData: { error: error.message },
+    });
+    await errorLog.save();
+
+    res.status(500).json({ message: 'Failed to send SMS', error: error.message });
+  }
+};
+
+// Fetch data from Jira and log the operation
 const getJiraData = async (req, res) => {
   try {
-    // Extract the issue key from the request (e.g., from query params or body)
-    const issueKey = req.query.issueKey || "ISSUE_KEY"; // Replace with a default key or dynamic value
-    
-    // Jira API URL
+    const issueKey = req.query.issueKey;
+
+    if (!issueKey) {
+      return res.status(400).json({ message: 'Issue key is required' });
+    }
+
     const jiraUrl = `${process.env.JIRA_BASE_URL}/rest/api/3/issue/${issueKey}`;
 
-    // Perform GET request to Jira
     const response = await axios.get(jiraUrl, {
       headers: {
         Authorization: `Basic ${Buffer.from(
           `${process.env.JIRA_USERNAME}:${process.env.JIRA_API_TOKEN}`
-        ).toString("base64")}`, // Use Basic Authentication with Base64-encoded credentials
-        "Content-Type": "application/json",
+        ).toString('base64')}`, // Use Basic Authentication with Base64-encoded credentials
+        'Content-Type': 'application/json',
       },
     });
 
-    // Send the Jira response back to the client
+    logger.info('Fetched Jira data:', response.data);
+
+    // Save log entry for successful Jira fetch
+    const logData = {
+      level: 'info',
+      message: `Fetched Jira data for issueKey: ${issueKey}`,
+      timestamp: new Date(),
+      additionalData: { issueKey, jiraData: response.data },
+    };
+
+    const newLog = new LogRecord(logData);
+    await newLog.save();
+
     res.status(200).json(response.data);
   } catch (error) {
-    console.error("Error fetching data from Jira:", error.message);
+    logger.error('Error fetching data from Jira:', { error: error.message });
+
+    // Save error log entry to MongoDB
+    const errorLog = new LogRecord({
+      level: 'error',
+      message: 'Error fetching data from Jira',
+      timestamp: new Date(),
+      additionalData: { error: error.message, issueKey },
+    });
+    await errorLog.save();
+
     res.status(error.response?.status || 500).json({
-      message: "Failed to fetch data from Jira",
+      message: 'Failed to fetch data from Jira',
       error: error.response?.data || error.message,
     });
   }
 };
 
-module.exports = { getJiraData };
+// Export all functions
+module.exports = { processData, sendSMS, getJiraData };
