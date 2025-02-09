@@ -135,5 +135,6 @@ const getJiraData = async (req, res) => {
   }
 };
 
+
 // Export all functions
 module.exports = { processData, sendSMS, getJiraData };
