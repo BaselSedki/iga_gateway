@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const routes = require('./routes');
+const routes = require('./routes');  // Import the routes file (ensure the path is correct)
 require('dotenv').config();
 
 const app = express();
@@ -13,15 +13,16 @@ app.use(bodyParser.json());
 // Enable CORS for all routes
 app.use(
     cors({
-        origin: 'http://192.168.10.123',
+        origin: '*',  // Change '*' to a specific domain for better security
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
     })
 );
 
-// Handle Preflight OPTIONS Requests
+// Handle Preflight OPTIONS Requests (for CORS)
 app.options('*', cors());
 
+// MongoDB connection
 const MONGO_URI = process.env.MONGO_URL || 'mongodb://localhost:27017/iga_database';
 mongoose
     .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -31,8 +32,8 @@ mongoose
         process.exit(1); // Exit process if connection fails
     });
 
-// API Routes
-app.use('/api', routes);
+// Use routes for API calls
+app.use('/api', routes);  // Prefix all API routes with /api
 
 // Health Check Route
 app.get('/health', (req, res) => {
@@ -53,3 +54,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`IGA Gateway running on port ${PORT}`);
 });
+
+
+

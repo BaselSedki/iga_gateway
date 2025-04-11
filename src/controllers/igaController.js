@@ -42,23 +42,26 @@ const processData = async (req, res) => {
   }
 };
 
-// Handle SMS sending and log to MongoDB
 const sendSMS = async (req, res) => {
   try {
-    const { incdientid, summarydetails } = req.body;
+    const { mobNum, companyName, transactionTimestamp, internalReference, secureHash, smsText } = req.body;
 
-    if (!incdientid || !summarydetails) {
-      return res.status(400).json({ message: 'incdientid and summarydetails are required' });
+    // Validate required fields
+    if (!mobNum || !companyName || !smsText) {
+      return res.status(400).json({ message: 'Mobile number, company name, and SMS text are required' });
     }
 
-    // Simulate SMS sending (replace with actual SMS service)
-    console.log(`Sending SMS to ${incdientid}: ${summarydetails}`);
-    logger.info(`SMS sent to ${incdientid}: ${summarydetails}`);
+    // Simulate SMS sending (replace with actual SMS service like Twilio, Nexmo, etc.)
+    console.log(`Sending SMS to ${mobNum}: ${smsText}`);
+    // You can integrate with SMS gateway here
+
+    // Log SMS details (to MongoDB, or just log to console for now)
+    console.log(`SMS sent to ${mobNum}: ${smsText}`);
 
     // Save SMS log entry to MongoDB
     const logData = {
       level: 'info',
-      message: `SMS sent to ${incdientid}: ${summarydetails}`,
+      message: `SMS sent to ${mobNum}: ${smsText}`,
       timestamp: new Date(),
     };
 
@@ -67,7 +70,7 @@ const sendSMS = async (req, res) => {
 
     res.status(200).json({ message: 'SMS sent and logged successfully' });
   } catch (error) {
-    logger.error('Error sending SMS:', { error: error.message });
+    console.error('Error sending SMS:', error.message);
 
     // Save error log entry to MongoDB
     const errorLog = new LogRecord({
@@ -81,6 +84,10 @@ const sendSMS = async (req, res) => {
     res.status(500).json({ message: 'Failed to send SMS', error: error.message });
   }
 };
+
+module.exports = { sendSMS };
+
+
 
 // Fetch data from Jira and log the operation
 const getJiraData = async (req, res) => {

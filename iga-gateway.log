@@ -1,7 +1,0 @@
-{"data":"Sample data","level":"info","message":"Received data:","timestamp":"2024-11-24T13:54:20.124Z"}
-{"level":"info","message":"SMS sent to INC-15: No value found","timestamp":"2024-11-27T10:36:36.069Z"}
-{"error":"phone is not defined","level":"error","message":"Error sending SMS:","timestamp":"2024-11-27T10:38:59.187Z"}
-{"level":"info","message":"SMS sent to INC-15: No value found","timestamp":"2024-11-27T10:42:20.764Z"}
-{"level":"info","message":"SMS sent to INC-12: There was an incident with our Third Party.","timestamp":"2024-11-27T11:26:19.361Z"}
-{"level":"info","message":"SMS sent to INC-15: No value found","timestamp":"2024-11-27T12:26:26.824Z"}
-{"level":"info","message":"SMS sent to INC-15: No value found","timestamp":"2024-12-12T22:14:33.310Z"}
